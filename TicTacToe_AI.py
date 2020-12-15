@@ -240,9 +240,9 @@ def startMultiplayerGame():
         isGameOver = gameOver(board)
         if isGameOver:
             if isGameOver == player1:
-                print("\n\tPlayer 1 Wins. Congratulations🎉🎊🎈")
+                print("\n\tPlayer 1 Won. Congratulations🎉🎊🎈")
             elif isGameOver == player2:
-                print("\n\tPlayer 2 Wins. Congratulations🎉🎊🎈")
+                print("\n\tPlayer 2 Won. Congratulations🎉🎊🎈")
             else:
                 print("\n\n\tHmppppp!!Match Tied.")
             break
@@ -299,7 +299,7 @@ def PlayerVsComputer():
         if isGameOver:
             if isGameOver == computer:
                 print(
-                    "\n\tHurray!! Computer (%s) Win..\n\tBetterLuck Next Time." % computer)
+                    "\n\tHurray!! Computer (%s) Won..\n\tBetterLuck Next Time." % computer)
             elif isGameOver == player:
                 print("\n\tCongratulations You (%s) Won." % player)
             else:
@@ -349,4 +349,3 @@ if __name__ == "__main__":
         else:
             print("Thanks For Playing.Bye")
             break
-#	print("[program finished]")
