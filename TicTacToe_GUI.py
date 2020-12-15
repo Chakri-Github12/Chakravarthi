@@ -1,7 +1,7 @@
 
 from time import sleep
 
-from tkinter import *
+from tkinter import Tk, Label, Button, Frame, StringVar, CENTER
 import random
 
 
