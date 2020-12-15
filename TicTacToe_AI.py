@@ -321,7 +321,7 @@ def vsComputer():
 
 # main
 if __name__ == "__main__":
-    computer = "
+    computer = ""
     player = ""
     # multiplayer
     player1 = ""
