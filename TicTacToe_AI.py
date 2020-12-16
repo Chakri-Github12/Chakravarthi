@@ -59,7 +59,7 @@ def printBoard(board):
     print("\n\n")
 
 
-def checkRow(board, pos, player):
+def calculateRow(board, pos, player):
     x = pos[0]
     row = [board[x][0], board[x][1], board[x][2]]
     if player not in row:
@@ -70,7 +70,7 @@ def checkRow(board, pos, player):
     return row.count(player)+1
 
 
-def checkCol(board, pos, player):
+def calculateCol(board, pos, player):
     y = pos[1]
     col = [board[0][y], board[1][y], board[2][y]]
     if player not in col:
@@ -81,7 +81,7 @@ def checkCol(board, pos, player):
     return col.count(player)+1
 
 
-def checkDiag1(board, pos, player):
+def calculateDiag1(board, pos, player):
     diag = [board[0][0], board[1][1], board[2][2]]
     if player not in diag:
         return 1
@@ -91,7 +91,7 @@ def checkDiag1(board, pos, player):
     return diag.count(player)+1
 
 
-def checkDiag2(board, pos, player):
+def calculateDiag2(board, pos, player):
     diag = [board[2][0], board[1][1], board[0][2]]
     if player not in diag:
         return 1
@@ -105,15 +105,21 @@ def availableLocations(board):
     return [(x, y) for x in range(len(board)) for y in range(len(board[0])) if board[x][y] == ""]
 
 
-def getScore(board, p, comp):
-    rows = checkRow(board, p, comp)
-    cols = checkCol(board, p, comp)
-    diag1, diag2 = 0, 0
-    if p[0] == p[1]:
-        diag1 = checkDiag1(board, p, comp)
+def getScore(board, pos, comp):
+    """
+    Calculates Score for a given pos on the board
+    Scoring:
+        if opposite pawn present in the line score will be 0
+        no of occurances of 'comp' + 1
 
-    if p[0] + p[1] == 2:
-        diag2 = checkDiag2(board, p, comp)
+    """
+    rows = calculateRow(board, pos, comp)
+    cols = calculateCol(board, pos, comp)
+    diag1, diag2 = 0, 0
+    if pos[0] == pos[1]:
+        diag1 = calculateDiag1(board, pos, comp)
+    if pos[0] + pos[1] == 2:
+        diag2 = calculateDiag2(board, pos, comp)
     scores = [rows, cols, diag1, diag2]
     return max(scores), scores.count(max(scores))
 
@@ -136,20 +142,26 @@ def getValues(favour, maxScore, maxCount):
 
 
 def getPositions(board, tk):
+    """
+        Returns the list of locations of 'board' that conatains a specific character 'tk'
+    """
     return [(i, j) for i in range(len(board)) for j in range(len(board[0])) if board[i][j] == tk]
 
 
 def nextMove(board, comp):
+    # Returns the next possible move for computer
     pos = getPositions(board, "")
     opposite = "O" if comp == "X" else "X"
+    # if no move is played
+    # then going with corners is best option
     if len(pos) == 9:
         return random.choice([(0, 0), (0, 2), (2, 0), (2, 2)])
+    # in first case we have 
     if len(pos) == 7:
+        loc = getPositions(board, comp)
         if board[1][1] == "":
-            loc = getPositions(board, comp)
             nloc = getPositions(board, opposite)
             x, y = loc[0]
-
             if nloc[0][0] == x:
                 return (2-x, y)
             elif nloc[0][1] == y:
@@ -159,9 +171,10 @@ def nextMove(board, comp):
             else:
                 return random.choice([(0, 0), (2, 2)])
         else:
-            loc = getPositions(board, comp)
             return 2-loc[0][0], 2-loc[0][1]
+    # Save the favourable cases
     favour = dict()
+    # Not Favourable Cases
     notFavour = dict()
     for p in pos:
         score, count = getScore(board, p, comp)
@@ -176,14 +189,10 @@ def nextMove(board, comp):
         if nmaxScore > 2:
             return getValues(notFavour, nmaxScore, nmaxCount)[0]
         elif nmaxScore == 2:
-            print("Stopping Opponent")
             ps = getValues(notFavour, nmaxScore, nmaxCount)
-            print(ps)
             if len(ps) == 1:
-                print("stopped")
                 return ps[0]
             else:
-                print("strategy found.\nBreaking Strategy")
                 ps = getValues(favour, maxScore, maxCount)
                 ps = [(x, y) for x, y in ps if abs(x-y) != 2]
                 return random.choice(ps)
@@ -194,6 +203,10 @@ def nextMove(board, comp):
 
 
 def tie(board):
+    """
+        Returns True if game is tied 
+        False otherwise
+    """
     for i in range(3):
         for j in range(3):
             if board[i][j] == "":
@@ -202,11 +215,23 @@ def tie(board):
 
 
 def gameOver(board):
+    
+    """ 
+    Checks whether the game is over 
+    
+    Returns 
+        player pawn if someone won
+        "tie" if game tied
+        False otherwise
+    """
     for i in range(3):
+        # Checks the column 
         if board[i][0] != "" and board[i][0] == board[i][1] == board[i][2]:
             return board[i][0]
+        # Checks the row
         if board[0][i] != "" and board[0][i] == board[1][i] == board[2][i]:
             return board[0][i]
+    # Check the daigonals
     if board[1][1] != "" and (board[0][0] == board[1][1] == board[2][2]) or (board[0][2] == board[1][1] == board[2][0]):
         return board[1][1]
     if tie(board):
@@ -215,28 +240,38 @@ def gameOver(board):
 
 
 def startMultiplayerGame():
+    """
+    Two players will play the game on 3 x 3 grid
+        player 1 - O
+        player 2 - X
+    """
     global player1, player2
     board = [["" for i in range(3)] for j in range(3)]
+    # who start first ?
     nextPlayer = random.choice([player1, player2])
-    tot = 0
     print("\n\n\tLets Start..")
     printBoard(board)
     while True:
-        tot += 1
-        playerTurn = nextPlayer
-        if playerTurn == player1:
+        currentPlayer = nextPlayer
+        if currentPlayer == player1:
             print("\n\tIts player 1's Turn.\n\tEnter the next pawn location row,col .")
             nextPlayer = player2
         else:
             print("\n\tIts player 2's Turn.\n\tEnter the next pawn location row,col .")
             nextPlayer = player1
         x, y = readXandY()
+
+        # If the current location is already occupied
+        # Ask the user to enter a empty location
         while board[x][y] != "":
+
             print(
                 "\n\tYou Can't Place Here It is Already Ocuupied.\n\tPlease Enter Different location.")
             x, y = readXandY()
-        board[x][y] = playerTurn
+        # update board
+        board[x][y] = currentPlayer
         printBoard(board)
+        # check if game is over
         isGameOver = gameOver(board)
         if isGameOver:
             if isGameOver == player1:
@@ -264,6 +299,7 @@ def Multiplayer():
 
 
 def PlayerVsComputer():
+    # player vs computer
     board = [["" for i in range(3)] for j in range(3)]
     turn = random.choice([computer, player])
     if turn == computer:
@@ -272,8 +308,8 @@ def PlayerVsComputer():
         print("\n\tYou Go First..")
     printBoard(board)
     while True:
-        playerTurn = turn
-        if playerTurn == computer:
+        currentPlayer = turn
+        if currentPlayer == computer:
             print("")
             x, y = nextMove(board, computer)
             cnt = 0
