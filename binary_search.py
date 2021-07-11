@@ -4,9 +4,7 @@ def binary_search(array: list[int], key: int, /) -> int:
     binary_search(..)
         binary_search(array: list[int], key: int, /) -> int
 
-        Return the index in array where key is found.
-
-        Return -1 on failure.
+        Returns the index of the key if found else -1
 
     """
     n = len(array)
